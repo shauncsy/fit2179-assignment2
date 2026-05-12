@@ -1,17 +1,108 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 40px;
-    background-color: #f7f7f7;
-}
-
-h1 {
+    margin: 0;
+    background-color: #f4f4f4;
     color: #222;
 }
 
-p {
-    font-size: 18px;
+header {
+    background-color: #1f2937;
+    color: white;
+    padding: 40px;
+    text-align: center;
 }
 
-#vis {
-    margin-top: 30px;
+header h1 {
+    margin-bottom: 15px;
+    font-size: 36px;
+}
+
+header p {
+    max-width: 850px;
+    margin: 0 auto;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+main {
+    max-width: 1350px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+section {
+    background-color: white;
+    margin-bottom: 30px;
+    padding: 30px;
+    border-radius: 10px;
+}
+
+h2 {
+    color: #1f2937;
+}
+
+p {
+    line-height: 1.6;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+.map-controls {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.map-controls button {
+    padding: 8px 14px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 6px;
+    background-color: #1f2937;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.map-controls button:hover {
+    background-color: #374151;
+}
+
+.map-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+#nbl_map {
+    display: flex;
+    justify-content: center;
+}
+
+.team-legend {
+    min-width: 260px;
+    background-color: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 15px 20px;
+    font-size: 14px;
+}
+
+.team-legend h3 {
+    margin-top: 0;
+    color: #1f2937;
+}
+
+.team-legend p {
+    margin: 8px 0;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #1f2937;
+    color: white;
 }

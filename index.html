@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FIT2179 Assignment 2</title>
+    <title>NBL vs NBA Basketball Visualisation</title>
 
     <link rel="stylesheet" href="css/style.css">
 
@@ -13,13 +13,78 @@
 </head>
 
 <body>
-    <h1>FIT2179 Assignment 2</h1>
+    <header>
+        <h1>NBL vs NBA Basketball Visualisation</h1>
 
-    <p>
-        This project explores basketball data visualisation using Vega-Lite.
-    </p>
+        <p>
+            This data visualisation project compares the Australian National Basketball League 
+            with the NBA, focusing on teams, locations, player performance, and league development.
+        </p>
+    </header>
 
-    <div id="vis"></div>
+    <main>
+        <section>
+            <h2>Project Introduction</h2>
+
+            <p>
+                Basketball is becoming increasingly popular in Australia. This project uses interactive 
+                visualisations to explore how the NBL compares with the NBA in terms of geography, 
+                team structure, and player performance.
+            </p>
+        </section>
+
+        <section>
+            <h2>Visualisation 1: NBL Team Locations</h2>
+
+            <p>
+                This map shows NBL team locations across Australia and New Zealand using the prepared
+                NBL team statistics dataset. The number inside each point represents the team's calculated
+                ranking, while the colour represents win percentage. Users can hover over each point to
+                view team performance details such as wins, losses, shooting percentage, rebounds, assists,
+                and turnovers.
+            </p>
+
+            <div class="map-controls">
+                <button id="zoom_in">Zoom In +</button>
+                <button id="zoom_out">Zoom Out -</button>
+                <button id="zoom_reset">Reset</button>
+            </div>
+
+            <div class="map-wrapper">
+                <div id="nbl_map"></div>
+
+                <div class="team-legend">
+                    <h3>NBL Teams</h3>
+                    <p>Adelaide 36ers</p>
+                    <p>Brisbane Bullets</p>
+                    <p>Cairns Taipans</p>
+                    <p>Illawarra Hawks</p>
+                    <p>Melbourne United</p>
+                    <p>New Zealand Breakers</p>
+                    <p>Perth Wildcats</p>
+                    <p>South East Melbourne Phoenix</p>
+                    <p>Sydney Kings</p>
+                    <p>Tasmania JackJumpers</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Planned Visualisations</h2>
+
+            <ul>
+                <li>Map of NBL team locations in Australia and New Zealand</li>
+                <li>Map of NBA team locations in North America</li>
+                <li>Comparison of league scale between the NBL and NBA</li>
+                <li>Comparison of player statistics between NBL and NBA</li>
+                <li>Interactive team or player performance comparison</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>FIT2179 Assignment 2 | Data Visualisation Project</p>
+    </footer>
 
     <script src="js/main.js"></script>
 </body>
