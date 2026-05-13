@@ -1047,3 +1047,311 @@ const nblProfileHeatmapSpec = {
 vegaEmbed("#nbl_profile_heatmap", nblProfileHeatmapSpec, {
     "actions": false
 });
+
+// Idiom6: NBL Player Scoring Style Analysis
+const nblPlayerData = {
+    "url": "data/nbl-player-stats.csv",
+    "format": {
+        "type": "csv"
+    }
+};
+
+function createNblPlayerTransforms() {
+    return [
+        {
+            "calculate": "toNumber(datum.Matches)",
+            "as": "MatchesNum"
+        },
+        {
+            "calculate": "toNumber(datum.Minutes_A)",
+            "as": "MinutesNum"
+        },
+        {
+            "calculate": "toNumber(datum.Points_A)",
+            "as": "PointsNum"
+        },
+        {
+            "calculate": "toNumber(datum.Assists_A)",
+            "as": "AssistsNum"
+        },
+        {
+            "calculate": "toNumber(datum.TotalRebounds_A)",
+            "as": "ReboundsNum"
+        },
+        {
+            "calculate": "toNumber(datum.ThreePointersAttempted_A)",
+            "as": "ThreePointAttemptsNum"
+        },
+        {
+            "calculate": "toNumber(datum.FreeThrowsAttempted_A)",
+            "as": "FreeThrowAttemptsNum"
+        },
+        {
+            "calculate": "toNumber(datum.EffectiveFieldGoalPercentage)",
+            "as": "EffectiveFieldGoalPctNum"
+        },
+        {
+            "calculate": "toNumber(datum.PPP)",
+            "as": "PPPNum"
+        },
+        {
+            "calculate": "toNumber(datum.PIE)",
+            "as": "PIENum"
+        },
+        {
+            "calculate": "toNumber(datum.FIC)",
+            "as": "FICNum"
+        },
+        {
+            "calculate": "toNumber(datum.PlusMinusPoints_A)",
+            "as": "PlusMinusNum"
+        },
+        {
+            "filter": "datum.MatchesNum >= 10 && datum.MinutesNum >= 10"
+        }
+    ];
+}
+
+const nblPlayerScoringStyleSpec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width": 850,
+    "height": 500,
+    "title": "NBL Player Scoring Style Analysis",
+
+    "data": nblPlayerData,
+
+    "transform": createNblPlayerTransforms(),
+
+    "mark": {
+        "type": "circle",
+        "opacity": 0.75,
+        "stroke": "white",
+        "strokeWidth": 1.5
+    },
+
+    "encoding": {
+        "x": {
+            "field": "ThreePointAttemptsNum",
+            "type": "quantitative",
+            "title": "Three-Point Attempts Per Game",
+            "scale": {
+                "zero": false
+            }
+        },
+        "y": {
+            "field": "FreeThrowAttemptsNum",
+            "type": "quantitative",
+            "title": "Free Throw Attempts Per Game",
+            "scale": {
+                "zero": false
+            }
+        },
+        "size": {
+            "field": "PointsNum",
+            "type": "quantitative",
+            "title": "Points Per Game",
+            "scale": {
+                "range": [40, 800]
+            }
+        },
+        "color": {
+            "field": "EffectiveFieldGoalPctNum",
+            "type": "quantitative",
+            "title": "eFG %",
+            "scale": {
+                "scheme": "yellowgreenblue"
+            }
+        },
+        "tooltip": [
+            {
+                "field": "Player",
+                "type": "nominal",
+                "title": "Player"
+            },
+            {
+                "field": "Team",
+                "type": "nominal",
+                "title": "Team"
+            },
+            {
+                "field": "MatchesNum",
+                "type": "quantitative",
+                "title": "Matches"
+            },
+            {
+                "field": "MinutesNum",
+                "type": "quantitative",
+                "title": "Minutes",
+                "format": ".1f"
+            },
+            {
+                "field": "PointsNum",
+                "type": "quantitative",
+                "title": "Points",
+                "format": ".1f"
+            },
+            {
+                "field": "ThreePointAttemptsNum",
+                "type": "quantitative",
+                "title": "3PA",
+                "format": ".1f"
+            },
+            {
+                "field": "FreeThrowAttemptsNum",
+                "type": "quantitative",
+                "title": "FTA",
+                "format": ".1f"
+            },
+            {
+                "field": "EffectiveFieldGoalPctNum",
+                "type": "quantitative",
+                "title": "eFG %",
+                "format": ".1f"
+            },
+            {
+                "field": "AssistsNum",
+                "type": "quantitative",
+                "title": "Assists",
+                "format": ".1f"
+            },
+            {
+                "field": "ReboundsNum",
+                "type": "quantitative",
+                "title": "Rebounds",
+                "format": ".1f"
+            }
+        ]
+    }
+};
+
+vegaEmbed("#nbl_player_scoring_style", nblPlayerScoringStyleSpec, {
+    "actions": false
+});
+
+
+// Idiom7:  NBL Player Advanced Efficiency Analysis
+const nblPlayerAdvancedEfficiencySpec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width": 850,
+    "height": 500,
+    "title": "NBL Player Advanced Efficiency Analysis",
+
+    "data": nblPlayerData,
+
+    "transform": createNblPlayerTransforms().concat([
+        {
+            "filter": "isValid(datum.PPPNum) && isValid(datum.PIENum) && isValid(datum.FICNum) && isValid(datum.EffectiveFieldGoalPctNum)"
+        }
+    ]),
+
+    "mark": {
+        "type": "circle",
+        "opacity": 0.75,
+        "stroke": "white",
+        "strokeWidth": 1.5
+    },
+
+    "encoding": {
+        "x": {
+            "field": "PPPNum",
+            "type": "quantitative",
+            "title": "PPP",
+            "scale": {
+                "zero": false
+            }
+        },
+        "y": {
+            "field": "PIENum",
+            "type": "quantitative",
+            "title": "PIE",
+            "scale": {
+                "zero": false
+            }
+        },
+        "size": {
+            "field": "FICNum",
+            "type": "quantitative",
+            "title": "FIC",
+            "scale": {
+                "range": [40, 900]
+            }
+        },
+        "color": {
+            "field": "EffectiveFieldGoalPctNum",
+            "type": "quantitative",
+            "title": "eFG %",
+            "scale": {
+                "scheme": "yellowgreenblue"
+            }
+        },
+        "tooltip": [
+            {
+                "field": "Player",
+                "type": "nominal",
+                "title": "Player"
+            },
+            {
+                "field": "Team",
+                "type": "nominal",
+                "title": "Team"
+            },
+            {
+                "field": "MatchesNum",
+                "type": "quantitative",
+                "title": "Matches"
+            },
+            {
+                "field": "MinutesNum",
+                "type": "quantitative",
+                "title": "Minutes Per Game",
+                "format": ".1f"
+            },
+            {
+                "field": "PointsNum",
+                "type": "quantitative",
+                "title": "Points Per Game",
+                "format": ".1f"
+            },
+            {
+                "field": "AssistsNum",
+                "type": "quantitative",
+                "title": "Assists Per Game",
+                "format": ".1f"
+            },
+            {
+                "field": "ReboundsNum",
+                "type": "quantitative",
+                "title": "Rebounds Per Game",
+                "format": ".1f"
+            },
+            {
+                "field": "PPPNum",
+                "type": "quantitative",
+                "title": "PPP",
+                "format": ".2f"
+            },
+            {
+                "field": "PIENum",
+                "type": "quantitative",
+                "title": "PIE",
+                "format": ".1f"
+            },
+            {
+                "field": "FICNum",
+                "type": "quantitative",
+                "title": "FIC",
+                "format": ".1f"
+            },
+            {
+                "field": "EffectiveFieldGoalPctNum",
+                "type": "quantitative",
+                "title": "eFG %",
+                "format": ".1f"
+            }
+        ]
+    }
+};
+
+vegaEmbed("#nbl_player_advanced_efficiency", nblPlayerAdvancedEfficiencySpec, {
+    "actions": false
+});
