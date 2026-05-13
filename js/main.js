@@ -588,3 +588,329 @@ document.getElementById("show_net").addEventListener("click", function () {
 });
 
 drawPerformanceMap();
+
+
+// Idiom3: NBL Team Metric Ranking Bar Chart
+function createNblTeamAnalysisTransforms() {
+    return createNblTransforms().concat([
+        {
+            "calculate": "toNumber(datum.FieldGoalPercentage)",
+            "as": "FieldGoalPctNum"
+        },
+        {
+            "calculate": "toNumber(datum.ThreePointPercentage)",
+            "as": "ThreePointPctNum"
+        },
+        {
+            "calculate": "toNumber(datum.TotalRebounds)",
+            "as": "TotalReboundsNum"
+        },
+        {
+            "calculate": "toNumber(datum.Assists)",
+            "as": "AssistsNum"
+        },
+        {
+            "calculate": "toNumber(datum.Turnovers)",
+            "as": "TurnoversNum"
+        }
+    ]);
+}
+
+const metricInfo = {
+    "WinPercentNum": {
+        "title": "Win Percentage",
+        "format": ".1f",
+        "sortOrder": "descending"
+    },
+    "ScoreNum": {
+        "title": "Average Score",
+        "format": ".1f",
+        "sortOrder": "descending"
+    },
+    "ScoreAgainstNum": {
+        "title": "Average Score Against",
+        "format": ".1f",
+        "sortOrder": "ascending"
+    },
+    "FieldGoalPctNum": {
+        "title": "Field Goal Percentage",
+        "format": ".1f",
+        "sortOrder": "descending"
+    },
+    "ThreePointPctNum": {
+        "title": "Three Point Percentage",
+        "format": ".1f",
+        "sortOrder": "descending"
+    },
+    "TotalReboundsNum": {
+        "title": "Total Rebounds",
+        "format": ".1f",
+        "sortOrder": "descending"
+    },
+    "AssistsNum": {
+        "title": "Assists",
+        "format": ".1f",
+        "sortOrder": "descending"
+    },
+    "TurnoversNum": {
+        "title": "Turnovers",
+        "format": ".1f",
+        "sortOrder": "ascending"
+    }
+};
+
+function createMetricBarSpec(metricField) {
+    const selectedMetric = metricInfo[metricField];
+
+    return {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "width": 850,
+        "height": 420,
+        "title": "NBL Team Ranking by " + selectedMetric.title,
+
+        "data": nblTeamData,
+
+        "transform": createNblTeamAnalysisTransforms(),
+
+        "mark": {
+            "type": "bar",
+            "cornerRadiusEnd": 4
+        },
+
+        "encoding": {
+            "y": {
+                "field": "fullTeam",
+                "type": "nominal",
+                "title": "Team",
+                "sort": {
+                    "field": metricField,
+                    "order": selectedMetric.sortOrder
+                }
+            },
+            "x": {
+                "field": metricField,
+                "type": "quantitative",
+                "title": selectedMetric.title
+            },
+            "color": {
+                "field": "WinPercentNum",
+                "type": "quantitative",
+                "title": "Win %",
+                "scale": {
+                    "scheme": "yellowgreenblue"
+                }
+            },
+            "tooltip": [
+                {
+                    "field": "fullTeam",
+                    "type": "nominal",
+                    "title": "Team"
+                },
+                {
+                    "field": "rank",
+                    "type": "ordinal",
+                    "title": "Overall Rank"
+                },
+                {
+                    "field": "Record",
+                    "type": "nominal",
+                    "title": "Record"
+                },
+                {
+                    "field": metricField,
+                    "type": "quantitative",
+                    "title": selectedMetric.title,
+                    "format": selectedMetric.format
+                },
+                {
+                    "field": "WinPercentNum",
+                    "type": "quantitative",
+                    "title": "Win %",
+                    "format": ".1f"
+                },
+                {
+                    "field": "ScoreNum",
+                    "type": "quantitative",
+                    "title": "Average Score",
+                    "format": ".1f"
+                },
+                {
+                    "field": "ScoreAgainstNum",
+                    "type": "quantitative",
+                    "title": "Average Score Against",
+                    "format": ".1f"
+                },
+                {
+                    "field": "FieldGoalPctNum",
+                    "type": "quantitative",
+                    "title": "FG %",
+                    "format": ".1f"
+                },
+                {
+                    "field": "ThreePointPctNum",
+                    "type": "quantitative",
+                    "title": "3PT %",
+                    "format": ".1f"
+                }
+            ]
+        }
+    };
+}
+
+function drawMetricBar() {
+    const selectedMetric = document.getElementById("team_metric_select").value;
+    const metricBarSpec = createMetricBarSpec(selectedMetric);
+
+    vegaEmbed("#nbl_metric_bar", metricBarSpec, {
+        "actions": false
+    });
+}
+
+document.getElementById("team_metric_select").addEventListener("change", function () {
+    drawMetricBar();
+});
+
+drawMetricBar();
+
+// Idiom4: NBL Offensive vs Defensive Efficiency Scatter Plot
+const nblEfficiencyScatterSpec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width": 850,
+    "height": 500,
+    "title": "NBL Offensive vs Defensive Efficiency",
+
+    "layer": [
+        {
+            "data": nblTeamData,
+            "transform": createNblTeamAnalysisTransforms(),
+            "mark": {
+                "type": "circle",
+                "opacity": 0.85,
+                "stroke": "white",
+                "strokeWidth": 2
+            },
+            "encoding": {
+                "x": {
+                    "field": "ScoreNum",
+                    "type": "quantitative",
+                    "title": "Average Score",
+                    "scale": {
+                        "zero": false
+                    }
+                },
+                "y": {
+                    "field": "ScoreAgainstNum",
+                    "type": "quantitative",
+                    "title": "Average Score Against",
+                    "scale": {
+                        "zero": false
+                    }
+                },
+                "size": {
+                    "field": "TotalReboundsNum",
+                    "type": "quantitative",
+                    "title": "Total Rebounds",
+                    "scale": {
+                        "range": [150, 900]
+                    }
+                },
+                "color": {
+                    "field": "WinPercentNum",
+                    "type": "quantitative",
+                    "title": "Win %",
+                    "scale": {
+                        "scheme": "yellowgreenblue"
+                    }
+                },
+                "tooltip": [
+                    {
+                        "field": "fullTeam",
+                        "type": "nominal",
+                        "title": "Team"
+                    },
+                    {
+                        "field": "rank",
+                        "type": "ordinal",
+                        "title": "Overall Rank"
+                    },
+                    {
+                        "field": "Record",
+                        "type": "nominal",
+                        "title": "Record"
+                    },
+                    {
+                        "field": "ScoreNum",
+                        "type": "quantitative",
+                        "title": "Average Score",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "ScoreAgainstNum",
+                        "type": "quantitative",
+                        "title": "Average Score Against",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "ScoreDifference",
+                        "type": "quantitative",
+                        "title": "Score Difference",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "WinPercentNum",
+                        "type": "quantitative",
+                        "title": "Win %",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "TotalReboundsNum",
+                        "type": "quantitative",
+                        "title": "Total Rebounds",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "AssistsNum",
+                        "type": "quantitative",
+                        "title": "Assists",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "TurnoversNum",
+                        "type": "quantitative",
+                        "title": "Turnovers",
+                        "format": ".1f"
+                    }
+                ]
+            }
+        },
+        {
+            "data": nblTeamData,
+            "transform": createNblTeamAnalysisTransforms(),
+            "mark": {
+                "type": "text",
+                "align": "left",
+                "baseline": "middle",
+                "dx": 8,
+                "fontSize": 11
+            },
+            "encoding": {
+                "x": {
+                    "field": "ScoreNum",
+                    "type": "quantitative"
+                },
+                "y": {
+                    "field": "ScoreAgainstNum",
+                    "type": "quantitative"
+                },
+                "text": {
+                    "field": "Team",
+                    "type": "nominal"
+                }
+            }
+        }
+    ]
+};
+
+vegaEmbed("#nbl_efficiency_scatter", nblEfficiencyScatterSpec, {
+    "actions": false
+});

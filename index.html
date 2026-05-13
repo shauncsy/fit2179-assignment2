@@ -89,6 +89,57 @@
 
             <div id="nbl_performance_map"></div>
         </section>
+
+
+        <section>
+            <h2>Section 2: NBL Team Statistical Analysis</h2>
+
+            <p>
+                This section uses the NBL team statistics dataset to compare teams beyond their geographic
+                locations. It focuses on ranking teams by key performance indicators such as win percentage,
+                score, shooting efficiency, rebounds, and assists.
+            </p>
+        </section>
+
+
+        <section>
+            <h2>Visualisation 3: NBL Team Metric Ranking</h2>
+
+            <p>
+                This interactive bar chart ranks NBL teams by different performance metrics. Users can
+                switch between win percentage, average score, field goal percentage, three-point percentage,
+                rebounds, assists, and turnovers to compare team strengths from different perspectives.
+            </p>
+
+            <div class="chart-controls">
+                <label for="team_metric_select">Choose a metric:</label>
+
+                <select id="team_metric_select">
+                    <option value="WinPercentNum">Win Percentage</option>
+                    <option value="ScoreNum">Average Score</option>
+                    <option value="ScoreAgainstNum">Average Score Against</option>
+                    <option value="FieldGoalPctNum">Field Goal Percentage</option>
+                    <option value="ThreePointPctNum">Three Point Percentage</option>
+                    <option value="TotalReboundsNum">Total Rebounds</option>
+                    <option value="AssistsNum">Assists</option>
+                    <option value="TurnoversNum">Turnovers</option>
+                </select>
+            </div>
+            <div id="nbl_metric_bar"></div>
+        </section>
+
+
+        <section>
+            <h2>Visualisation 4: NBL Offensive vs Defensive Efficiency</h2>
+            <p>
+                This scatter plot compares each NBL team's offensive and defensive performance.
+                The x-axis shows average score, while the y-axis shows average score against.
+                Teams further to the right have stronger scoring ability, while teams lower on the chart
+                allow fewer points. Circle colour represents win percentage, and circle size represents
+                total rebounds.
+            </p>
+            <div id="nbl_efficiency_scatter"></div>
+        </section>
     </main>
 
     <footer>

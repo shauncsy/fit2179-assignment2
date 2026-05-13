@@ -113,3 +113,33 @@ footer {
     justify-content: center;
     margin-top: 20px;
 }
+
+.chart-controls {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.chart-controls label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.chart-controls select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+#nbl_metric_bar {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+
+#nbl_efficiency_scatter {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
