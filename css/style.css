@@ -143,3 +143,9 @@ footer {
     justify-content: center;
     margin-top: 20px;
 }
+
+#nbl_profile_heatmap {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}

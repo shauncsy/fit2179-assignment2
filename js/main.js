@@ -914,3 +914,136 @@ const nblEfficiencyScatterSpec = {
 vegaEmbed("#nbl_efficiency_scatter", nblEfficiencyScatterSpec, {
     "actions": false
 });
+
+// Idiom5: NBL Team Performance Profile Heatmap
+const nblProfileHeatmapSpec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width": 850,
+    "height": 390,
+    "title": "NBL Team Performance Profile Heatmap",
+
+    "data": nblTeamData,
+
+    "transform": createNblTeamAnalysisTransforms().concat([
+        {
+            "fold": [
+                "WinPercentNum",
+                "ScoreNum",
+                "ScoreAgainstNum",
+                "FieldGoalPctNum",
+                "ThreePointPctNum",
+                "TotalReboundsNum",
+                "AssistsNum",
+                "TurnoversNum"
+            ],
+            "as": ["MetricField", "RawValue"]
+        },
+        {
+            "calculate": "datum.MetricField == 'WinPercentNum' ? 'Win %' : datum.MetricField == 'ScoreNum' ? 'Score' : datum.MetricField == 'ScoreAgainstNum' ? 'Score Against' : datum.MetricField == 'FieldGoalPctNum' ? 'FG %' : datum.MetricField == 'ThreePointPctNum' ? '3PT %' : datum.MetricField == 'TotalReboundsNum' ? 'Rebounds' : datum.MetricField == 'AssistsNum' ? 'Assists' : 'Turnovers'",
+            "as": "Metric"
+        },
+        {
+            "joinaggregate": [
+                {
+                    "op": "min",
+                    "field": "RawValue",
+                    "as": "MetricMin"
+                },
+                {
+                    "op": "max",
+                    "field": "RawValue",
+                    "as": "MetricMax"
+                }
+            ],
+            "groupby": ["MetricField"]
+        },
+        {
+            "calculate": "datum.MetricMax == datum.MetricMin ? 0.5 : (datum.RawValue - datum.MetricMin) / (datum.MetricMax - datum.MetricMin)",
+            "as": "NormalisedValue"
+        },
+        {
+            "calculate": "datum.MetricField == 'ScoreAgainstNum' || datum.MetricField == 'TurnoversNum' ? 1 - datum.NormalisedValue : datum.NormalisedValue",
+            "as": "PerformanceScore"
+        },
+        {
+            "calculate": "datum.PerformanceScore * 100",
+            "as": "PerformanceScorePct"
+        }
+    ]),
+
+    "mark": {
+        "type": "rect",
+        "stroke": "white",
+        "strokeWidth": 1
+    },
+
+    "encoding": {
+        "x": {
+            "field": "Metric",
+            "type": "nominal",
+            "title": "Performance Metric",
+            "sort": [
+                "Win %",
+                "Score",
+                "Score Against",
+                "FG %",
+                "3PT %",
+                "Rebounds",
+                "Assists",
+                "Turnovers"
+            ]
+        },
+        "y": {
+            "field": "fullTeam",
+            "type": "nominal",
+            "title": "Team",
+            "sort": {
+                "op": "min",
+                "field": "rank",
+                "order": "ascending"
+            }
+        },
+        "color": {
+            "field": "PerformanceScorePct",
+            "type": "quantitative",
+            "title": "Relative Strength",
+            "scale": {
+                "scheme": "yellowgreenblue",
+                "domain": [0, 100]
+            }
+        },
+        "tooltip": [
+            {
+                "field": "fullTeam",
+                "type": "nominal",
+                "title": "Team"
+            },
+            {
+                "field": "rank",
+                "type": "ordinal",
+                "title": "Overall Rank"
+            },
+            {
+                "field": "Metric",
+                "type": "nominal",
+                "title": "Metric"
+            },
+            {
+                "field": "RawValue",
+                "type": "quantitative",
+                "title": "Original Value",
+                "format": ".1f"
+            },
+            {
+                "field": "PerformanceScorePct",
+                "type": "quantitative",
+                "title": "Relative Strength",
+                "format": ".1f"
+            }
+        ]
+    }
+};
+
+vegaEmbed("#nbl_profile_heatmap", nblProfileHeatmapSpec, {
+    "actions": false
+});
