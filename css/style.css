@@ -162,3 +162,11 @@ footer {
     justify-content: center;
     margin-top: 20px;
 }
+
+#league_team_scoring,
+#league_player_scoring_style,
+#league_player_efficiency {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}

@@ -1550,3 +1550,645 @@ document.getElementById("player_metric_select").addEventListener("change", funct
 });
 
 drawNblPlayerTopRanking();
+
+
+// Idiom9: 
+const nbaPerGameComparisonData = {
+    "url": "data/nba-player-stats-per-game.csv",
+    "format": {
+        "type": "csv"
+    }
+};
+
+const nbaTotalComparisonData = {
+    "url": "data/nba-player-stats-total.csv",
+    "format": {
+        "type": "csv"
+    }
+};
+
+function createNblComparisonPlayerTransforms() {
+    return [
+        {
+            "calculate": "'NBL'",
+            "as": "League"
+        },
+        {
+            "calculate": "toNumber(datum.Matches)",
+            "as": "GamesNum"
+        },
+        {
+            "calculate": "toNumber(datum.Minutes_A)",
+            "as": "MinutesNum"
+        },
+        {
+            "calculate": "toNumber(datum.Points_A)",
+            "as": "PointsNum"
+        },
+        {
+            "calculate": "toNumber(datum.ThreePointersAttempted_A)",
+            "as": "ThreePointAttemptsNum"
+        },
+        {
+            "calculate": "toNumber(datum.FreeThrowsAttempted_A)",
+            "as": "FreeThrowAttemptsNum"
+        },
+        {
+            "calculate": "toNumber(datum.EffectiveFieldGoalPercentage)",
+            "as": "EffectiveFieldGoalPctNum"
+        },
+        {
+            "filter": "datum.GamesNum >= 10 && datum.MinutesNum >= 10"
+        },
+        {
+            "filter": "isValid(datum.PointsNum) && isValid(datum.ThreePointAttemptsNum) && isValid(datum.FreeThrowAttemptsNum) && isValid(datum.EffectiveFieldGoalPctNum)"
+        }
+    ];
+}
+
+function createNbaComparisonPlayerTransforms() {
+    return [
+        {
+            "calculate": "'NBA'",
+            "as": "League"
+        },
+        {
+            "calculate": "toNumber(datum.G)",
+            "as": "GamesNum"
+        },
+        {
+            "calculate": "toNumber(datum.MP)",
+            "as": "MinutesNum"
+        },
+        {
+            "calculate": "toNumber(datum.PTS)",
+            "as": "PointsNum"
+        },
+        {
+            "calculate": "toNumber(datum['3PA'])",
+            "as": "ThreePointAttemptsNum"
+        },
+        {
+            "calculate": "toNumber(datum.FTA)",
+            "as": "FreeThrowAttemptsNum"
+        },
+        {
+            "calculate": "toNumber(datum['eFG%']) * 100",
+            "as": "EffectiveFieldGoalPctNum"
+        },
+        {
+            "filter": "datum.Team != '2TM' && datum.Team != '3TM' && datum.Team != '4TM'"
+        },
+        {
+            "filter": "datum.GamesNum >= 20 && datum.MinutesNum >= 10"
+        },
+        {
+            "filter": "isValid(datum.PointsNum) && isValid(datum.ThreePointAttemptsNum) && isValid(datum.FreeThrowAttemptsNum) && isValid(datum.EffectiveFieldGoalPctNum)"
+        }
+    ];
+}
+
+const leagueTeamScoringSpec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width": 850,
+    "height": 430,
+    "title": "NBL vs NBA Team Scoring Level",
+
+    "layer": [
+        {
+            "data": nblTeamData,
+            "transform": [
+                {
+                    "calculate": "'NBL'",
+                    "as": "League"
+                },
+                {
+                    "calculate": "datum.Team",
+                    "as": "TeamName"
+                },
+                {
+                    "calculate": "toNumber(datum.Score)",
+                    "as": "TeamScoring"
+                },
+                {
+                    "calculate": "toNumber(datum.WinPercentage)",
+                    "as": "WinPercentNum"
+                }
+            ],
+            "mark": {
+                "type": "circle",
+                "size": 170,
+                "opacity": 0.85,
+                "stroke": "white",
+                "strokeWidth": 1
+            },
+            "encoding": {
+                "x": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "y": {
+                    "field": "TeamScoring",
+                    "type": "quantitative",
+                    "title": "Team Points Per Game"
+                },
+                "color": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "tooltip": [
+                    {
+                        "field": "League",
+                        "type": "nominal",
+                        "title": "League"
+                    },
+                    {
+                        "field": "TeamName",
+                        "type": "nominal",
+                        "title": "Team"
+                    },
+                    {
+                        "field": "TeamScoring",
+                        "type": "quantitative",
+                        "title": "Points Per Game",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "WinPercentNum",
+                        "type": "quantitative",
+                        "title": "Win %",
+                        "format": ".1f"
+                    }
+                ]
+            }
+        },
+        {
+            "data": nbaTotalComparisonData,
+            "transform": [
+                {
+                    "calculate": "toNumber(datum.PTS)",
+                    "as": "PlayerTotalPoints"
+                },
+                {
+                    "filter": "datum.Team != '2TM' && datum.Team != '3TM' && datum.Team != '4TM'"
+                },
+                {
+                    "aggregate": [
+                        {
+                            "op": "sum",
+                            "field": "PlayerTotalPoints",
+                            "as": "TeamTotalPoints"
+                        }
+                    ],
+                    "groupby": ["Team"]
+                },
+                {
+                    "calculate": "'NBA'",
+                    "as": "League"
+                },
+                {
+                    "calculate": "datum.Team",
+                    "as": "TeamName"
+                },
+                {
+                    "calculate": "datum.TeamTotalPoints / 82",
+                    "as": "TeamScoring"
+                }
+            ],
+            "mark": {
+                "type": "circle",
+                "size": 170,
+                "opacity": 0.85,
+                "stroke": "white",
+                "strokeWidth": 1
+            },
+            "encoding": {
+                "x": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "y": {
+                    "field": "TeamScoring",
+                    "type": "quantitative",
+                    "title": "Team Points Per Game"
+                },
+                "color": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "tooltip": [
+                    {
+                        "field": "League",
+                        "type": "nominal",
+                        "title": "League"
+                    },
+                    {
+                        "field": "TeamName",
+                        "type": "nominal",
+                        "title": "Team"
+                    },
+                    {
+                        "field": "TeamScoring",
+                        "type": "quantitative",
+                        "title": "Estimated Points Per Game",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "TeamTotalPoints",
+                        "type": "quantitative",
+                        "title": "Total Player Points",
+                        "format": ".0f"
+                    }
+                ]
+            }
+        }
+    ]
+};
+
+vegaEmbed("#league_team_scoring", leagueTeamScoringSpec, {
+    "actions": false
+});
+
+// Idiom10:
+const leaguePlayerScoringStyleSpec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width": 850,
+    "height": 500,
+    "title": "NBL vs NBA Player Scoring Style",
+
+    "layer": [
+        {
+            "data": nblPlayerData,
+            "transform": createNblComparisonPlayerTransforms(),
+            "mark": {
+                "type": "circle",
+                "opacity": 0.65,
+                "stroke": "white",
+                "strokeWidth": 1
+            },
+            "encoding": {
+                "x": {
+                    "field": "ThreePointAttemptsNum",
+                    "type": "quantitative",
+                    "title": "Three-Point Attempts Per Game",
+                    "scale": {
+                        "zero": false
+                    }
+                },
+                "y": {
+                    "field": "FreeThrowAttemptsNum",
+                    "type": "quantitative",
+                    "title": "Free Throw Attempts Per Game",
+                    "scale": {
+                        "zero": false
+                    }
+                },
+                "size": {
+                    "field": "PointsNum",
+                    "type": "quantitative",
+                    "title": "Points Per Game",
+                    "scale": {
+                        "range": [30, 700]
+                    }
+                },
+                "color": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "tooltip": [
+                    {
+                        "field": "League",
+                        "type": "nominal",
+                        "title": "League"
+                    },
+                    {
+                        "field": "Player",
+                        "type": "nominal",
+                        "title": "Player"
+                    },
+                    {
+                        "field": "Team",
+                        "type": "nominal",
+                        "title": "Team"
+                    },
+                    {
+                        "field": "PointsNum",
+                        "type": "quantitative",
+                        "title": "Points",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "ThreePointAttemptsNum",
+                        "type": "quantitative",
+                        "title": "3PA",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "FreeThrowAttemptsNum",
+                        "type": "quantitative",
+                        "title": "FTA",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "EffectiveFieldGoalPctNum",
+                        "type": "quantitative",
+                        "title": "eFG %",
+                        "format": ".1f"
+                    }
+                ]
+            }
+        },
+        {
+            "data": nbaPerGameComparisonData,
+            "transform": createNbaComparisonPlayerTransforms(),
+            "mark": {
+                "type": "circle",
+                "opacity": 0.65,
+                "stroke": "white",
+                "strokeWidth": 1
+            },
+            "encoding": {
+                "x": {
+                    "field": "ThreePointAttemptsNum",
+                    "type": "quantitative",
+                    "title": "Three-Point Attempts Per Game",
+                    "scale": {
+                        "zero": false
+                    }
+                },
+                "y": {
+                    "field": "FreeThrowAttemptsNum",
+                    "type": "quantitative",
+                    "title": "Free Throw Attempts Per Game",
+                    "scale": {
+                        "zero": false
+                    }
+                },
+                "size": {
+                    "field": "PointsNum",
+                    "type": "quantitative",
+                    "title": "Points Per Game",
+                    "scale": {
+                        "range": [30, 700]
+                    }
+                },
+                "color": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "tooltip": [
+                    {
+                        "field": "League",
+                        "type": "nominal",
+                        "title": "League"
+                    },
+                    {
+                        "field": "Player",
+                        "type": "nominal",
+                        "title": "Player"
+                    },
+                    {
+                        "field": "Team",
+                        "type": "nominal",
+                        "title": "Team"
+                    },
+                    {
+                        "field": "Pos",
+                        "type": "nominal",
+                        "title": "Position"
+                    },
+                    {
+                        "field": "PointsNum",
+                        "type": "quantitative",
+                        "title": "Points",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "ThreePointAttemptsNum",
+                        "type": "quantitative",
+                        "title": "3PA",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "FreeThrowAttemptsNum",
+                        "type": "quantitative",
+                        "title": "FTA",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "EffectiveFieldGoalPctNum",
+                        "type": "quantitative",
+                        "title": "eFG %",
+                        "format": ".1f"
+                    }
+                ]
+            }
+        }
+    ]
+};
+
+vegaEmbed("#league_player_scoring_style", leaguePlayerScoringStyleSpec, {
+    "actions": false
+});
+
+// Idiom11:
+const leaguePlayerEfficiencySpec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width": 850,
+    "height": 500,
+    "title": "NBL vs NBA Player Scoring Efficiency",
+
+    "layer": [
+        {
+            "data": nblPlayerData,
+            "transform": createNblComparisonPlayerTransforms(),
+            "mark": {
+                "type": "circle",
+                "opacity": 0.65,
+                "stroke": "white",
+                "strokeWidth": 1
+            },
+            "encoding": {
+                "x": {
+                    "field": "EffectiveFieldGoalPctNum",
+                    "type": "quantitative",
+                    "title": "Effective Field Goal Percentage (%)",
+                    "scale": {
+                        "zero": false
+                    }
+                },
+                "y": {
+                    "field": "PointsNum",
+                    "type": "quantitative",
+                    "title": "Points Per Game",
+                    "scale": {
+                        "zero": false
+                    }
+                },
+                "size": {
+                    "field": "MinutesNum",
+                    "type": "quantitative",
+                    "title": "Minutes Per Game",
+                    "scale": {
+                        "range": [30, 700]
+                    }
+                },
+                "color": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "tooltip": [
+                    {
+                        "field": "League",
+                        "type": "nominal",
+                        "title": "League"
+                    },
+                    {
+                        "field": "Player",
+                        "type": "nominal",
+                        "title": "Player"
+                    },
+                    {
+                        "field": "Team",
+                        "type": "nominal",
+                        "title": "Team"
+                    },
+                    {
+                        "field": "PointsNum",
+                        "type": "quantitative",
+                        "title": "Points",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "MinutesNum",
+                        "type": "quantitative",
+                        "title": "Minutes",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "EffectiveFieldGoalPctNum",
+                        "type": "quantitative",
+                        "title": "eFG %",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "ThreePointAttemptsNum",
+                        "type": "quantitative",
+                        "title": "3PA",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "FreeThrowAttemptsNum",
+                        "type": "quantitative",
+                        "title": "FTA",
+                        "format": ".1f"
+                    }
+                ]
+            }
+        },
+        {
+            "data": nbaPerGameComparisonData,
+            "transform": createNbaComparisonPlayerTransforms(),
+            "mark": {
+                "type": "circle",
+                "opacity": 0.65,
+                "stroke": "white",
+                "strokeWidth": 1
+            },
+            "encoding": {
+                "x": {
+                    "field": "EffectiveFieldGoalPctNum",
+                    "type": "quantitative",
+                    "title": "Effective Field Goal Percentage (%)",
+                    "scale": {
+                        "zero": false
+                    }
+                },
+                "y": {
+                    "field": "PointsNum",
+                    "type": "quantitative",
+                    "title": "Points Per Game",
+                    "scale": {
+                        "zero": false
+                    }
+                },
+                "size": {
+                    "field": "MinutesNum",
+                    "type": "quantitative",
+                    "title": "Minutes Per Game",
+                    "scale": {
+                        "range": [30, 700]
+                    }
+                },
+                "color": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "tooltip": [
+                    {
+                        "field": "League",
+                        "type": "nominal",
+                        "title": "League"
+                    },
+                    {
+                        "field": "Player",
+                        "type": "nominal",
+                        "title": "Player"
+                    },
+                    {
+                        "field": "Team",
+                        "type": "nominal",
+                        "title": "Team"
+                    },
+                    {
+                        "field": "Pos",
+                        "type": "nominal",
+                        "title": "Position"
+                    },
+                    {
+                        "field": "PointsNum",
+                        "type": "quantitative",
+                        "title": "Points",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "MinutesNum",
+                        "type": "quantitative",
+                        "title": "Minutes",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "EffectiveFieldGoalPctNum",
+                        "type": "quantitative",
+                        "title": "eFG %",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "ThreePointAttemptsNum",
+                        "type": "quantitative",
+                        "title": "3PA",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "FreeThrowAttemptsNum",
+                        "type": "quantitative",
+                        "title": "FTA",
+                        "format": ".1f"
+                    }
+                ]
+            }
+        }
+    ]
+};
+
+vegaEmbed("#league_player_efficiency", leaguePlayerEfficiencySpec, {
+    "actions": false
+});
