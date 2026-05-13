@@ -1048,7 +1048,12 @@ vegaEmbed("#nbl_profile_heatmap", nblProfileHeatmapSpec, {
     "actions": false
 });
 
-// Idiom6: NBL Player Scoring Style Analysis
+
+
+
+
+
+// Idiom7: NBL Player Scoring Style Analysis
 const nblPlayerData = {
     "url": "data/nbl-player-stats.csv",
     "format": {
@@ -1229,7 +1234,7 @@ vegaEmbed("#nbl_player_scoring_style", nblPlayerScoringStyleSpec, {
 });
 
 
-// Idiom7:  NBL Player Advanced Efficiency Analysis
+// Idiom8:  NBL Player Advanced Efficiency Analysis
 const nblPlayerAdvancedEfficiencySpec = {
     "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
     "width": 850,
@@ -1355,3 +1360,193 @@ const nblPlayerAdvancedEfficiencySpec = {
 vegaEmbed("#nbl_player_advanced_efficiency", nblPlayerAdvancedEfficiencySpec, {
     "actions": false
 });
+
+// Idiom6: NBL Top Player Ranking Bar Chart
+const playerMetricInfo = {
+    "PointsNum": {
+        "title": "Points Per Game",
+        "format": ".1f"
+    },
+    "AssistsNum": {
+        "title": "Assists Per Game",
+        "format": ".1f"
+    },
+    "ReboundsNum": {
+        "title": "Rebounds Per Game",
+        "format": ".1f"
+    },
+    "PPPNum": {
+        "title": "PPP",
+        "format": ".2f"
+    },
+    "PIENum": {
+        "title": "PIE",
+        "format": ".1f"
+    },
+    "FICNum": {
+        "title": "FIC",
+        "format": ".1f"
+    },
+    "EffectiveFieldGoalPctNum": {
+        "title": "Effective Field Goal %",
+        "format": ".1f"
+    }
+};
+
+function createNblPlayerTopRankingSpec(metricField) {
+    const selectedMetric = playerMetricInfo[metricField];
+
+    return {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "width": 850,
+        "height": 500,
+        "title": "Top 15 NBL Players by " + selectedMetric.title,
+
+        "data": nblPlayerData,
+
+        "transform": createNblPlayerTransforms().concat([
+            {
+                "filter": "isValid(datum." + metricField + ")"
+            },
+            {
+                "calculate": "datum.Player + ' (' + datum.Team + ')'",
+                "as": "PlayerLabel"
+            },
+            {
+                "window": [
+                    {
+                        "op": "row_number",
+                        "as": "PlayerRank"
+                    }
+                ],
+                "sort": [
+                    {
+                        "field": metricField,
+                        "order": "descending"
+                    }
+                ]
+            },
+            {
+                "filter": "datum.PlayerRank <= 15"
+            }
+        ]),
+
+        "mark": {
+            "type": "bar",
+            "cornerRadiusEnd": 4
+        },
+
+        "encoding": {
+            "y": {
+                "field": "PlayerLabel",
+                "type": "nominal",
+                "title": "Player",
+                "sort": {
+                    "field": "PlayerRank",
+                    "order": "ascending"
+                }
+            },
+            "x": {
+                "field": metricField,
+                "type": "quantitative",
+                "title": selectedMetric.title
+            },
+            "color": {
+                "field": "Team",
+                "type": "nominal",
+                "title": "Team"
+            },
+            "tooltip": [
+                {
+                    "field": "PlayerRank",
+                    "type": "ordinal",
+                    "title": "Rank"
+                },
+                {
+                    "field": "Player",
+                    "type": "nominal",
+                    "title": "Player"
+                },
+                {
+                    "field": "Team",
+                    "type": "nominal",
+                    "title": "Team"
+                },
+                {
+                    "field": "MatchesNum",
+                    "type": "quantitative",
+                    "title": "Matches"
+                },
+                {
+                    "field": "MinutesNum",
+                    "type": "quantitative",
+                    "title": "Minutes Per Game",
+                    "format": ".1f"
+                },
+                {
+                    "field": metricField,
+                    "type": "quantitative",
+                    "title": selectedMetric.title,
+                    "format": selectedMetric.format
+                },
+                {
+                    "field": "PointsNum",
+                    "type": "quantitative",
+                    "title": "Points",
+                    "format": ".1f"
+                },
+                {
+                    "field": "AssistsNum",
+                    "type": "quantitative",
+                    "title": "Assists",
+                    "format": ".1f"
+                },
+                {
+                    "field": "ReboundsNum",
+                    "type": "quantitative",
+                    "title": "Rebounds",
+                    "format": ".1f"
+                },
+                {
+                    "field": "PPPNum",
+                    "type": "quantitative",
+                    "title": "PPP",
+                    "format": ".2f"
+                },
+                {
+                    "field": "PIENum",
+                    "type": "quantitative",
+                    "title": "PIE",
+                    "format": ".1f"
+                },
+                {
+                    "field": "FICNum",
+                    "type": "quantitative",
+                    "title": "FIC",
+                    "format": ".1f"
+                },
+                {
+                    "field": "EffectiveFieldGoalPctNum",
+                    "type": "quantitative",
+                    "title": "eFG %",
+                    "format": ".1f"
+                }
+            ]
+        }
+    };
+}
+
+function drawNblPlayerTopRanking() {
+    const selectedMetric = document.getElementById("player_metric_select").value;
+    const playerRankingSpec = createNblPlayerTopRankingSpec(selectedMetric);
+
+    vegaEmbed("#nbl_player_top_ranking", playerRankingSpec, {
+        "actions": false
+    });
+}
+
+document.getElementById("player_metric_select").addEventListener("change", function () {
+    drawNblPlayerTopRanking();
+});
+
+drawNblPlayerTopRanking();

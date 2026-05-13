@@ -166,9 +166,34 @@
             </p>
         </section>
 
+        <section>
+            <h2>Visualisation 6: NBL Top Player Ranking</h2>
+
+            <p>
+                This interactive bar chart ranks the top NBL players by selected performance metrics.
+                Users can switch between scoring, assists, rebounds, efficiency, and advanced impact
+                indicators. This provides a more direct ranking view compared with the previous scatter
+                and bubble charts.
+            </p>
+
+            <div class="chart-controls">
+                <label for="player_metric_select">Choose a player metric:</label>
+                    <select id="player_metric_select">
+                        <option value="PointsNum">Points Per Game</option>
+                        <option value="AssistsNum">Assists Per Game</option>
+                        <option value="ReboundsNum">Rebounds Per Game</option>
+                        <option value="PPPNum">PPP</option>
+                        <option value="PIENum">PIE</option>
+                        <option value="FICNum">FIC</option>
+                        <option value="EffectiveFieldGoalPctNum">Effective Field Goal %</option>
+                    </select>
+            </div>
+            <div id="nbl_player_top_ranking"></div>
+        </section>
+
 
         <section>
-            <h2>Visualisation 8: NBL Player Scoring Style Analysis</h2>
+            <h2>Visualisation 7: NBL Player Scoring Style Analysis</h2>
 
             <p>
                 This scatter plot compares NBL players by three-point attempts and free throw attempts.
@@ -181,7 +206,7 @@
         </section>
 
         <section>
-            <h2>Visualisation 9: NBL Player Advanced Efficiency Analysis</h2>
+            <h2>Visualisation 8: NBL Player Advanced Efficiency Analysis</h2>
 
             <p>
                 This bubble chart compares NBL players using advanced statistics. The x-axis shows PPP,

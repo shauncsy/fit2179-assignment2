@@ -150,6 +150,12 @@ footer {
     margin-top: 20px;
 }
 
+#nbl_player_top_ranking {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
 #nbl_player_scoring_style,
 #nbl_player_advanced_efficiency {
     display: flex;
