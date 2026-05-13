@@ -170,3 +170,9 @@ footer {
     justify-content: center;
     margin-top: 20px;
 }
+
+#league_parallel_profile {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}

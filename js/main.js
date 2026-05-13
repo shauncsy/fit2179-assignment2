@@ -2192,3 +2192,505 @@ const leaguePlayerEfficiencySpec = {
 vegaEmbed("#league_player_efficiency", leaguePlayerEfficiencySpec, {
     "actions": false
 });
+
+
+// Idiom12: final summary
+const summaryNblPlayerData = {
+    "url": "data/nbl-player-stats.csv",
+    "format": {
+        "type": "csv"
+    }
+};
+
+const summaryNbaPlayerData = {
+    "url": "data/nba-player-stats-per-game.csv",
+    "format": {
+        "type": "csv"
+    }
+};
+
+const parallelMetricSort = [
+    "Points",
+    "3PA",
+    "FTA",
+    "eFG%",
+    "Minutes",
+    "Assists",
+    "Rebounds"
+];
+
+function createNblParallelTransforms(includeRanking) {
+    const transforms = [
+        {
+            "calculate": "'NBL'",
+            "as": "League"
+        },
+        {
+            "calculate": "datum.Player + ' (' + datum.Team + ')'",
+            "as": "PlayerLabel"
+        },
+        {
+            "calculate": "toNumber(datum.Matches)",
+            "as": "GamesNum"
+        },
+        {
+            "calculate": "toNumber(datum.Minutes_A)",
+            "as": "MinutesNum"
+        },
+        {
+            "calculate": "toNumber(datum.Points_A)",
+            "as": "PointsNum"
+        },
+        {
+            "calculate": "toNumber(datum.ThreePointersAttempted_A)",
+            "as": "ThreePointAttemptsNum"
+        },
+        {
+            "calculate": "toNumber(datum.FreeThrowsAttempted_A)",
+            "as": "FreeThrowAttemptsNum"
+        },
+        {
+            "calculate": "toNumber(datum.EffectiveFieldGoalPercentage)",
+            "as": "EffectiveFieldGoalPctNum"
+        },
+        {
+            "calculate": "toNumber(datum.Assists_A)",
+            "as": "AssistsNum"
+        },
+        {
+            "calculate": "toNumber(datum.TotalRebounds_A)",
+            "as": "ReboundsNum"
+        },
+        {
+            "filter": "datum.GamesNum >= 10 && datum.MinutesNum >= 10"
+        },
+        {
+            "filter": "isValid(datum.PointsNum) && isValid(datum.ThreePointAttemptsNum) && isValid(datum.FreeThrowAttemptsNum) && isValid(datum.EffectiveFieldGoalPctNum) && isValid(datum.MinutesNum) && isValid(datum.AssistsNum) && isValid(datum.ReboundsNum)"
+        }
+    ];
+
+    if (includeRanking) {
+        transforms.push(
+            {
+                "window": [
+                    {
+                        "op": "row_number",
+                        "as": "PlayerRank"
+                    }
+                ],
+                "sort": [
+                    {
+                        "field": "PointsNum",
+                        "order": "descending"
+                    }
+                ]
+            },
+            {
+                "filter": "datum.PlayerRank <= 35"
+            }
+        );
+    }
+
+    return transforms.concat(createParallelNormalisationTransforms());
+}
+
+function createNbaParallelTransforms(includeRanking) {
+    const transforms = [
+        {
+            "calculate": "'NBA'",
+            "as": "League"
+        },
+        {
+            "calculate": "datum.Player + ' (' + datum.Team + ')'",
+            "as": "PlayerLabel"
+        },
+        {
+            "calculate": "toNumber(datum.G)",
+            "as": "GamesNum"
+        },
+        {
+            "calculate": "toNumber(datum.MP)",
+            "as": "MinutesNum"
+        },
+        {
+            "calculate": "toNumber(datum.PTS)",
+            "as": "PointsNum"
+        },
+        {
+            "calculate": "toNumber(datum['3PA'])",
+            "as": "ThreePointAttemptsNum"
+        },
+        {
+            "calculate": "toNumber(datum.FTA)",
+            "as": "FreeThrowAttemptsNum"
+        },
+        {
+            "calculate": "toNumber(datum['eFG%']) * 100",
+            "as": "EffectiveFieldGoalPctNum"
+        },
+        {
+            "calculate": "toNumber(datum.AST)",
+            "as": "AssistsNum"
+        },
+        {
+            "calculate": "toNumber(datum.TRB)",
+            "as": "ReboundsNum"
+        },
+        {
+            "filter": "datum.Team != '2TM' && datum.Team != '3TM' && datum.Team != '4TM'"
+        },
+        {
+            "filter": "datum.GamesNum >= 20 && datum.MinutesNum >= 10"
+        },
+        {
+            "filter": "isValid(datum.PointsNum) && isValid(datum.ThreePointAttemptsNum) && isValid(datum.FreeThrowAttemptsNum) && isValid(datum.EffectiveFieldGoalPctNum) && isValid(datum.MinutesNum) && isValid(datum.AssistsNum) && isValid(datum.ReboundsNum)"
+        }
+    ];
+
+    if (includeRanking) {
+        transforms.push(
+            {
+                "window": [
+                    {
+                        "op": "row_number",
+                        "as": "PlayerRank"
+                    }
+                ],
+                "sort": [
+                    {
+                        "field": "PointsNum",
+                        "order": "descending"
+                    }
+                ]
+            },
+            {
+                "filter": "datum.PlayerRank <= 35"
+            }
+        );
+    }
+
+    return transforms.concat(createParallelNormalisationTransforms());
+}
+
+function createParallelNormalisationTransforms() {
+    return [
+        {
+            "calculate": "datum.PointsNum / 35 * 100 > 100 ? 100 : datum.PointsNum / 35 * 100",
+            "as": "PointsScore"
+        },
+        {
+            "calculate": "datum.ThreePointAttemptsNum / 12 * 100 > 100 ? 100 : datum.ThreePointAttemptsNum / 12 * 100",
+            "as": "ThreePointScore"
+        },
+        {
+            "calculate": "datum.FreeThrowAttemptsNum / 12 * 100 > 100 ? 100 : datum.FreeThrowAttemptsNum / 12 * 100",
+            "as": "FreeThrowScore"
+        },
+        {
+            "calculate": "(datum.EffectiveFieldGoalPctNum - 35) / 40 * 100 < 0 ? 0 : (datum.EffectiveFieldGoalPctNum - 35) / 40 * 100 > 100 ? 100 : (datum.EffectiveFieldGoalPctNum - 35) / 40 * 100",
+            "as": "EfficiencyScore"
+        },
+        {
+            "calculate": "datum.MinutesNum / 40 * 100 > 100 ? 100 : datum.MinutesNum / 40 * 100",
+            "as": "MinutesScore"
+        },
+        {
+            "calculate": "datum.AssistsNum / 12 * 100 > 100 ? 100 : datum.AssistsNum / 12 * 100",
+            "as": "AssistsScore"
+        },
+        {
+            "calculate": "datum.ReboundsNum / 16 * 100 > 100 ? 100 : datum.ReboundsNum / 16 * 100",
+            "as": "ReboundsScore"
+        },
+        {
+            "fold": [
+                "PointsScore",
+                "ThreePointScore",
+                "FreeThrowScore",
+                "EfficiencyScore",
+                "MinutesScore",
+                "AssistsScore",
+                "ReboundsScore"
+            ],
+            "as": ["MetricField", "ProfileScore"]
+        },
+        {
+            "calculate": "datum.MetricField == 'PointsScore' ? 'Points' : datum.MetricField == 'ThreePointScore' ? '3PA' : datum.MetricField == 'FreeThrowScore' ? 'FTA' : datum.MetricField == 'EfficiencyScore' ? 'eFG%' : datum.MetricField == 'MinutesScore' ? 'Minutes' : datum.MetricField == 'AssistsScore' ? 'Assists' : 'Rebounds'",
+            "as": "Metric"
+        }
+    ];
+}
+
+const leagueParallelProfileSpec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width": 900,
+    "height": 520,
+    "title": "NBL vs NBA Player Profile Comparison",
+
+    "layer": [
+        {
+            "data": summaryNblPlayerData,
+            "transform": createNblParallelTransforms(true),
+            "mark": {
+                "type": "line",
+                "opacity": 0.18
+            },
+            "encoding": {
+                "x": {
+                    "field": "Metric",
+                    "type": "nominal",
+                    "title": "Player Profile Metric",
+                    "sort": parallelMetricSort
+                },
+                "y": {
+                    "field": "ProfileScore",
+                    "type": "quantitative",
+                    "title": "Normalised Score",
+                    "scale": {
+                        "domain": [0, 100]
+                    }
+                },
+                "detail": {
+                    "field": "PlayerLabel",
+                    "type": "nominal"
+                },
+                "color": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "tooltip": [
+                    {
+                        "field": "League",
+                        "type": "nominal",
+                        "title": "League"
+                    },
+                    {
+                        "field": "PlayerLabel",
+                        "type": "nominal",
+                        "title": "Player"
+                    },
+                    {
+                        "field": "Metric",
+                        "type": "nominal",
+                        "title": "Metric"
+                    },
+                    {
+                        "field": "ProfileScore",
+                        "type": "quantitative",
+                        "title": "Normalised Score",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "PointsNum",
+                        "type": "quantitative",
+                        "title": "Points",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "MinutesNum",
+                        "type": "quantitative",
+                        "title": "Minutes",
+                        "format": ".1f"
+                    }
+                ]
+            }
+        },
+        {
+            "data": summaryNbaPlayerData,
+            "transform": createNbaParallelTransforms(true),
+            "mark": {
+                "type": "line",
+                "opacity": 0.18
+            },
+            "encoding": {
+                "x": {
+                    "field": "Metric",
+                    "type": "nominal",
+                    "title": "Player Profile Metric",
+                    "sort": parallelMetricSort
+                },
+                "y": {
+                    "field": "ProfileScore",
+                    "type": "quantitative",
+                    "title": "Normalised Score",
+                    "scale": {
+                        "domain": [0, 100]
+                    }
+                },
+                "detail": {
+                    "field": "PlayerLabel",
+                    "type": "nominal"
+                },
+                "color": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "tooltip": [
+                    {
+                        "field": "League",
+                        "type": "nominal",
+                        "title": "League"
+                    },
+                    {
+                        "field": "PlayerLabel",
+                        "type": "nominal",
+                        "title": "Player"
+                    },
+                    {
+                        "field": "Metric",
+                        "type": "nominal",
+                        "title": "Metric"
+                    },
+                    {
+                        "field": "ProfileScore",
+                        "type": "quantitative",
+                        "title": "Normalised Score",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "PointsNum",
+                        "type": "quantitative",
+                        "title": "Points",
+                        "format": ".1f"
+                    },
+                    {
+                        "field": "MinutesNum",
+                        "type": "quantitative",
+                        "title": "Minutes",
+                        "format": ".1f"
+                    }
+                ]
+            }
+        },
+        {
+            "data": summaryNblPlayerData,
+            "transform": createNblParallelTransforms(false).concat([
+                {
+                    "aggregate": [
+                        {
+                            "op": "mean",
+                            "field": "ProfileScore",
+                            "as": "AverageProfileScore"
+                        }
+                    ],
+                    "groupby": ["League", "Metric"]
+                }
+            ]),
+            "mark": {
+                "type": "line",
+                "strokeWidth": 5,
+                "point": {
+                    "filled": true,
+                    "size": 90
+                }
+            },
+            "encoding": {
+                "x": {
+                    "field": "Metric",
+                    "type": "nominal",
+                    "title": "Player Profile Metric",
+                    "sort": parallelMetricSort
+                },
+                "y": {
+                    "field": "AverageProfileScore",
+                    "type": "quantitative",
+                    "title": "Normalised Score",
+                    "scale": {
+                        "domain": [0, 100]
+                    }
+                },
+                "color": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "tooltip": [
+                    {
+                        "field": "League",
+                        "type": "nominal",
+                        "title": "League"
+                    },
+                    {
+                        "field": "Metric",
+                        "type": "nominal",
+                        "title": "Metric"
+                    },
+                    {
+                        "field": "AverageProfileScore",
+                        "type": "quantitative",
+                        "title": "Average Score",
+                        "format": ".1f"
+                    }
+                ]
+            }
+        },
+        {
+            "data": summaryNbaPlayerData,
+            "transform": createNbaParallelTransforms(false).concat([
+                {
+                    "aggregate": [
+                        {
+                            "op": "mean",
+                            "field": "ProfileScore",
+                            "as": "AverageProfileScore"
+                        }
+                    ],
+                    "groupby": ["League", "Metric"]
+                }
+            ]),
+            "mark": {
+                "type": "line",
+                "strokeWidth": 5,
+                "point": {
+                    "filled": true,
+                    "size": 90
+                }
+            },
+            "encoding": {
+                "x": {
+                    "field": "Metric",
+                    "type": "nominal",
+                    "title": "Player Profile Metric",
+                    "sort": parallelMetricSort
+                },
+                "y": {
+                    "field": "AverageProfileScore",
+                    "type": "quantitative",
+                    "title": "Normalised Score",
+                    "scale": {
+                        "domain": [0, 100]
+                    }
+                },
+                "color": {
+                    "field": "League",
+                    "type": "nominal",
+                    "title": "League"
+                },
+                "tooltip": [
+                    {
+                        "field": "League",
+                        "type": "nominal",
+                        "title": "League"
+                    },
+                    {
+                        "field": "Metric",
+                        "type": "nominal",
+                        "title": "Metric"
+                    },
+                    {
+                        "field": "AverageProfileScore",
+                        "type": "quantitative",
+                        "title": "Average Score",
+                        "format": ".1f"
+                    }
+                ]
+            }
+        }
+    ]
+};
+
+vegaEmbed("#league_parallel_profile", leagueParallelProfileSpec, {
+    "actions": false
+});
