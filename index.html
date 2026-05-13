@@ -70,20 +70,29 @@
         </section>
 
         <section>
-            <h2>Planned Visualisations</h2>
+            <h2>Visualisation 2: NBL Offensive and Defensive Performance Map</h2>
 
-            <ul>
-                <li>Map of NBL team locations in Australia and New Zealand</li>
-                <li>Map of NBA team locations in North America</li>
-                <li>Comparison of league scale between the NBL and NBA</li>
-                <li>Comparison of player statistics between NBL and NBA</li>
-                <li>Interactive team or player performance comparison</li>
-            </ul>
+
+             <p>
+                This map explores NBL team performance from offensive and defensive perspectives.
+                Users can switch between offensive score, defensive score against, and score difference.
+                This helps compare not only where teams are located, but also how they perform on court.
+             </p>
+
+
+
+            <div class="map-controls">
+                <button id="show_offense">Offense</button>
+                <button id="show_defense">Defense</button>
+                <button id="show_net">Net Difference</button>
+            </div>
+
+            <div id="nbl_performance_map"></div>
         </section>
     </main>
 
     <footer>
-        <p>FIT2179 Assignment 2 | Data Visualisation Project</p>
+        <p>FIT2179 Data Visualisation 2</p>
     </footer>
 
     <script src="js/main.js"></script>

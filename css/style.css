@@ -106,3 +106,10 @@ footer {
     background-color: #1f2937;
     color: white;
 }
+
+
+#nbl_performance_map {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}

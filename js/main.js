@@ -1,3 +1,5 @@
+
+// Idiom1: NBL Team Locations Map
 const nblTeamLocations = [
     {
         "number": 1,
@@ -376,3 +378,213 @@ document.getElementById("zoom_reset").addEventListener("click", function () {
 });
 
 drawNblMap();
+
+
+
+
+// Idiom2: NBL Offensive and Defensive Performance Map
+let currentPerformanceView = "offense";
+
+function createPerformanceMapSpec(viewType) {
+    let mapTitle = "";
+    let colorField = "";
+    let colorTitle = "";
+    let sizeField = "";
+    let sizeTitle = "";
+    let colorScheme = "";
+    let reverseScale = false;
+
+    if (viewType === "offense") {
+        mapTitle = "NBL Offensive Performance Map";
+        colorField = "ScoreNum";
+        colorTitle = "Average Score";
+        sizeField = "FieldGoalPercentage";
+        sizeTitle = "FG %";
+        colorScheme = "oranges";
+        reverseScale = false;
+    } else if (viewType === "defense") {
+        mapTitle = "NBL Defensive Performance Map";
+        colorField = "ScoreAgainstNum";
+        colorTitle = "Average Score Against";
+        sizeField = "TotalRebounds";
+        sizeTitle = "Total Rebounds";
+        colorScheme = "redyellowgreen";
+        reverseScale = true;
+    } else {
+        mapTitle = "NBL Net Score Difference Map";
+        colorField = "ScoreDifference";
+        colorTitle = "Score Difference";
+        sizeField = "WinPercentNum";
+        sizeTitle = "Win %";
+        colorScheme = "redblue";
+        reverseScale = false;
+    }
+
+    return {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "width": 900,
+        "height": 580,
+        "title": mapTitle,
+
+        "projection": {
+            "type": "mercator",
+            "center": [138, -30],
+            "scale": 620
+        },
+
+        "layer": [
+            {
+                "data": {
+                    "url": "https://vega.github.io/vega-datasets/data/world-110m.json",
+                    "format": {
+                        "type": "topojson",
+                        "feature": "countries"
+                    }
+                },
+                "transform": [
+                    {
+                        "filter": "datum.id == 36 || datum.id == 554"
+                    }
+                ],
+                "mark": {
+                    "type": "geoshape",
+                    "fill": "#e5e7eb",
+                    "stroke": "#9ca3af",
+                    "strokeWidth": 1
+                }
+            },
+            {
+                "data": nblTeamData,
+                "transform": createNblTransforms(),
+                "mark": {
+                    "type": "circle",
+                    "stroke": "white",
+                    "strokeWidth": 2,
+                    "opacity": 0.9
+                },
+                "encoding": {
+                    "longitude": {
+                        "field": "longitude",
+                        "type": "quantitative"
+                    },
+                    "latitude": {
+                        "field": "latitude",
+                        "type": "quantitative"
+                    },
+                    "color": {
+                        "field": colorField,
+                        "type": "quantitative",
+                        "title": colorTitle,
+                        "scale": {
+                            "scheme": colorScheme,
+                            "reverse": reverseScale
+                        }
+                    },
+                    "size": {
+                        "field": sizeField,
+                        "type": "quantitative",
+                        "title": sizeTitle,
+                        "scale": {
+                            "range": [200, 850]
+                        }
+                    },
+                    "tooltip": [
+                        {
+                            "field": "fullTeam",
+                            "type": "nominal",
+                            "title": "Team"
+                        },
+                        {
+                            "field": "city",
+                            "type": "nominal",
+                            "title": "City"
+                        },
+                        {
+                            "field": "rank",
+                            "type": "ordinal",
+                            "title": "Rank"
+                        },
+                        {
+                            "field": "Record",
+                            "type": "nominal",
+                            "title": "Record"
+                        },
+                        {
+                            "field": "ScoreNum",
+                            "type": "quantitative",
+                            "title": "Average Score",
+                            "format": ".1f"
+                        },
+                        {
+                            "field": "ScoreAgainstNum",
+                            "type": "quantitative",
+                            "title": "Average Score Against",
+                            "format": ".1f"
+                        },
+                        {
+                            "field": "ScoreDifference",
+                            "type": "quantitative",
+                            "title": "Score Difference",
+                            "format": ".1f"
+                        },
+                        {
+                            "field": "FieldGoalPercentage",
+                            "type": "quantitative",
+                            "title": "FG %",
+                            "format": ".1f"
+                        },
+                        {
+                            "field": "ThreePointPercentage",
+                            "type": "quantitative",
+                            "title": "3PT %",
+                            "format": ".1f"
+                        },
+                        {
+                            "field": "TotalRebounds",
+                            "type": "quantitative",
+                            "title": "Rebounds",
+                            "format": ".1f"
+                        },
+                        {
+                            "field": "Assists",
+                            "type": "quantitative",
+                            "title": "Assists",
+                            "format": ".1f"
+                        },
+                        {
+                            "field": "Turnovers",
+                            "type": "quantitative",
+                            "title": "Turnovers",
+                            "format": ".1f"
+                        }
+                    ]
+                }
+            }
+        ]
+    };
+}
+
+function drawPerformanceMap() {
+    const performanceMapSpec = createPerformanceMapSpec(currentPerformanceView);
+
+    vegaEmbed("#nbl_performance_map", performanceMapSpec, {
+        "actions": false
+    });
+}
+
+document.getElementById("show_offense").addEventListener("click", function () {
+    currentPerformanceView = "offense";
+    drawPerformanceMap();
+});
+
+document.getElementById("show_defense").addEventListener("click", function () {
+    currentPerformanceView = "defense";
+    drawPerformanceMap();
+});
+
+document.getElementById("show_net").addEventListener("click", function () {
+    currentPerformanceView = "net";
+    drawPerformanceMap();
+});
+
+drawPerformanceMap();
